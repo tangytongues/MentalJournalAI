@@ -93,3 +93,4 @@ This application is designed for personal use and educational purposes. It is no
 ## License
 
 This project is open-source and available for personal and educational use.
+Created by @tangy_tongues
