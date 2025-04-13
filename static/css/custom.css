@@ -1,0 +1,169 @@
+/* Custom styles for the journal application */
+
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+}
+
+/* Journal entry styles */
+.journal-card {
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.journal-card:hover {
+    transform: translateY(-5px);
+}
+
+.entry-date {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.journal-title {
+    font-weight: 600;
+}
+
+.journal-content {
+    white-space: pre-line;
+}
+
+/* Mood indicators */
+.mood-positive {
+    color: var(--bs-success);
+}
+
+.mood-negative {
+    color: var(--bs-danger);
+}
+
+.mood-neutral {
+    color: var(--bs-secondary);
+}
+
+/* Custom form styles */
+.journal-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.entry-content {
+    min-height: 200px;
+    resize: vertical;
+}
+
+/* Insight cards */
+.insight-card {
+    height: 100%;
+    border-left: 4px solid var(--bs-info);
+}
+
+.insight-card.positive {
+    border-left-color: var(--bs-success);
+}
+
+.insight-card.negative {
+    border-left-color: var(--bs-danger);
+}
+
+.insight-card.neutral {
+    border-left-color: var(--bs-secondary);
+}
+
+/* Resource cards */
+.resource-card {
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.resource-card:hover {
+    transform: translateY(-3px);
+}
+
+.resource-category-anxiety {
+    border-left: 4px solid #FFC107;
+}
+
+.resource-category-depression {
+    border-left: 4px solid #6C757D;
+}
+
+.resource-category-stress {
+    border-left: 4px solid #DC3545;
+}
+
+.resource-category-general {
+    border-left: 4px solid #0D6EFD;
+}
+
+/* Emotion chart legend */
+.mood-chart-legend {
+    padding: 10px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px !important;
+    }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Entry preview truncation */
+.entry-preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 400px;
+}
+
+/* Signal tag styles */
+.signal-tag {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 50px;
+    font-weight: 500;
+}
+
+.signal-tag-anxiety {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #856404;
+}
+
+.signal-tag-depression {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #383d41;
+}
+
+.signal-tag-stress {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #721c24;
+}
+
+.signal-tag-anger {
+    background-color: rgba(232, 62, 140, 0.2);
+    color: #721c24;
+}
+
+.signal-tag-insomnia {
+    background-color: rgba(102, 16, 242, 0.2);
+    color: #3c0d99;
+}

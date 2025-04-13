@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Journal - Mind Journal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-0">Your Journal</h1>
+            <p class="text-muted">Express your thoughts and track your emotions</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Journal Entry Form -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">New Entry</h5>
+                </div>
+                <div class="card-body">
+                    <form id="journal-form" method="POST" action="{{ url_for('journal') }}">
+                        <div class="mb-3">
+                            <label for="entry-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="entry-title" name="title" placeholder="Give your entry a title" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="entry-content" class="form-label">What's on your mind today?</label>
+                            <textarea class="form-control entry-content" id="entry-content" name="content" rows="10" placeholder="Start writing your thoughts and feelings..." required></textarea>
+                            <div id="char-counter" class="form-text text-end">0 characters</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="submit-entry" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save me-1"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                Save Entry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Journaling Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Be honest with yourself</h6>
+                        <p class="text-muted small mb-0">This is your private space to express your true thoughts and feelings without judgment.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Write regularly</h6>
+                        <p class="text-muted small mb-0">Consistency helps establish a pattern to track your emotional health over time.</p>
+                    </div>
+                    
+                    <div>
+                        <h6>Don't filter yourself</h6>
+                        <p class="text-muted small mb-0">Write freely without worrying about grammar, spelling, or structure. Just let your thoughts flow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Journal Entry List -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Previous Entries</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if entries %}
+                        <div class="list-group list-group-flush">
+                            {% for entry in entries %}
+                                <a href="{{ url_for('entry', entry_id=entry.id) }}" class="list-group-item list-group-item-action border-0 py-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h5 class="mb-0 journal-title">{{ entry.title }}</h5>
+                                        <span class="badge 
+                                            {% if entry.sentiment_score > 0.3 %}
+                                                bg-success bg-opacity-10 text-success
+                                            {% elif entry.sentiment_score < -0.3 %}
+                                                bg-danger bg-opacity-10 text-danger
+                                            {% else %}
+                                                bg-secondary bg-opacity-10 text-secondary
+                                            {% endif %}
+                                        ">
+                                            {% if entry.sentiment_score > 0.3 %}
+                                                Positive
+                                            {% elif entry.sentiment_score < -0.3 %}
+                                                Negative
+                                            {% else %}
+                                                Neutral
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="text-muted entry-date mb-2">{{ entry.get_formatted_date() }}</p>
+                                    <p class="mb-0 entry-preview">{{ entry.content }}</p>
+                                    
+                                    {% set emotions = entry.emotion_data|tojson|fromjson %}
+                                    {% if emotions %}
+                                        <div class="mt-2">
+                                            {% for emotion, value in emotions.items() %}
+                                                {% if loop.index <= 2 %}
+                                                    <span class="badge bg-light text-dark me-1">{{ emotion|capitalize }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open text-muted mb-3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                            <h5>No Journal Entries Yet</h5>
+                            <p class="text-muted">Your journal entries will appear here once you create them.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/journal.js') }}"></script>
+{% endblock %}

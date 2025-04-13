@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ entry.title }} - Mind Journal{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('journal') }}">Journal</a></li>
+                    <li class="breadcrumb-item active">{{ entry.title }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Journal Entry Content -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm" id="entry-view">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-1">{{ entry.title }}</h2>
+                    <p class="text-muted mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        {{ entry.get_formatted_date() }}
+                    </p>
+                    
+                    <div class="journal-content mb-4">
+                        {{ entry.content }}
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Mood:</span>
+                        <span class="badge 
+                            {% if entry.sentiment_score > 0.3 %}
+                                bg-success
+                            {% elif entry.sentiment_score < -0.3 %}
+                                bg-danger
+                            {% else %}
+                                bg-secondary
+                            {% endif %}
+                            px-3 py-2">
+                            {% if entry.sentiment_score > 0.3 %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-smile me-1"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                Positive
+                            {% elif entry.sentiment_score < -0.3 %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-frown me-1"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                Negative
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-meh me-1"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="15" x2="16" y2="15"></line><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                Neutral
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mental Health Signals -->
+            {% if mental_health_signals %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Detected Patterns</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3 small">Our system detected potential patterns in your entry that might be related to the following:</p>
+                        
+                        <div class="d-flex flex-wrap">
+                            {% for signal in mental_health_signals %}
+                                <span class="signal-tag signal-tag-{{ signal }} me-2 mb-2">{{ signal|capitalize }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-info mt-3 mb-0 small">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-info me-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            These patterns are automatically detected based on language analysis. They are meant to help you reflect, not to diagnose.
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Analysis Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Emotion Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="emotion-chart" height="250" data-emotions="{{ emotion_data|tojson }}"></canvas>
+                    
+                    <hr class="my-4">
+                    
+                    <h6>Primary Emotions</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for emotion, score in emotion_data.items()|sort(reverse=true, attribute='1') %}
+                            {% if loop.index <= 3 %}
+                                <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
+                                    <span>{{ emotion|capitalize }}</span>
+                                    <span class="badge bg-primary">{{ (score * 100)|int }}%</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Resources -->
+            {% if resources %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Suggested Resources</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">Based on the content of your entry, here are some resources that might be helpful:</p>
+                        
+                        {% for resource in resources %}
+                            <div class="mb-3 {% if not loop.last %}pb-3 border-bottom{% endif %}">
+                                <h6>{{ resource.title }}</h6>
+                                <p class="mb-2 small">{{ resource.content }}</p>
+                                {% if resource.link %}
+                                    <a href="{{ resource.link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link me-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                        Learn More
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <a href="{{ url_for('resources') }}" class="btn btn-link btn-sm p-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle me-1"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                            View all resources
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mt-2">
+        <div class="col">
+            <a href="{{ url_for('journal') }}" class="btn btn-outline-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left me-1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Journal
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/journal.js') }}"></script>
+{% endblock %}
